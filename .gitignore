@@ -1,0 +1,57 @@
+# .gitignore for ThreatIntel Agent
+
+# 环境变量（包含 API Key）
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# 虚拟环境
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 数据（本地缓存和报告，不提交到 Git）
+data/cache/
+data/run.log
+data/*.db
+
+# 但保留报告目录结构
+!data/reports/.gitkeep
+!data/cache/.gitkeep
+
+# 临时修复脚本和调试文件
+_*.py
+*_debug*.py
+*_cnvd_page*
+
+# 根级的测试文件（已移入 tests/ 目录的不受影响）
+/test_*.py
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 报告输出（含敏感分析内容）
+data/reports/*.json
+data/reports/*.md
+data/reports/archive/
+!data/reports/.gitkeep
+
+# 根级报告目录（历史输出不应提交）
+reports/
+
+# 环境变量备份
+.env.*
+*.env

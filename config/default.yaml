@@ -1,0 +1,126 @@
+# ThreatIntel Agent 默认配置
+# 可通过环境变量覆盖
+
+llm:
+  # Provider: openai | deepseek (DeepSeek 完全兼容 OpenAI SDK, 中文分析能力优秀)
+  provider: deepseek
+  model: deepseek-v4-flash
+  api_base: https://api.deepseek.com/v1
+  temperature: 0.3
+  max_tokens: 8192
+  timeout: 120
+  batch_size: 15
+  concurrent_requests: 5
+
+collectors:
+  cve:
+    enabled: true
+    base_url: https://services.nvd.nist.gov/rest/json/cves/2.0
+    results_per_page: 50     # 每页返回数量
+    max_pages: 5             # 最大页数 (50 × 5 = 250 条)
+    cache_ttl: 3600  # 缓存秒数
+
+  github:
+    enabled: true
+    # 搜索 GitHub 上可能的密钥泄露
+    search_queries:
+      - "password OR secret OR token OR api_key filename:.env"
+      - "password OR secret OR token OR api_key filename:config.json"
+      - "BEGIN RSA PRIVATE KEY"
+    results_per_query: 10
+    cache_ttl: 7200
+
+  freebuf:
+    enabled: false  # 暂时禁用，RSS 源不稳定
+    rss_url: https://www.freebuf.com/feed
+    max_articles: 15
+    cache_ttl: 3600
+
+  security_news:
+    enabled: true
+    sources:
+      - name: The Hacker News
+        rss: https://feeds.feedburner.com/TheHackersNews
+      - name: Krebs on Security
+        rss: https://krebsonsecurity.com/feed/
+    max_articles: 10
+    cache_ttl: 3600
+
+  cnvd:
+    enabled: false  # 暂时禁用，等待申请官方 API
+    max_pages: 2
+    cache_ttl: 7200
+
+analyzers:
+  threat_levels:
+    - CRITICAL
+    - HIGH
+    - MEDIUM
+    - LOW
+    - INFO
+
+  dedup_threshold: 0.85  # 相似度阈值，超过则视为重复
+
+  asset_impact:
+    enabled: true
+    impact_threshold: 0.7  # 影响评分阈值
+
+reporter:
+  output_dir: data/reports
+  formats:
+    - markdown
+    - json
+  template: default
+
+# 告警配置
+alerts:
+  enabled_channels: []  # ["email", "dingtalk", "wecom"]
+  
+  email:
+    smtp_server: smtp.example.com
+    smtp_port: 587
+    smtp_user: alert@example.com
+    smtp_password: your_password
+    to_emails:
+      - security@example.com
+  
+  dingtalk:
+    webhook_url: https://oapi.dingtalk.com/robot/send?access_token=your_token
+  
+  wecom:
+    webhook_url: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=your_key
+
+# 数据库配置
+database:
+  enabled: true
+  db_name: threatintel.db
+
+# 定时任务配置
+scheduler:
+  enabled: false
+  tasks:
+    # 每小时检查 CVE 漏洞
+    - cron: "0 * * * *"
+      source: cve
+      alert: true
+      save_db: true
+    # 每天凌晨执行全量采集
+    - cron: "0 0 * * *"
+      source: all
+      alert: true
+      save_db: true
+    # 每6小时检查 GitHub 泄露
+    - cron: "0 */6 * * *"
+      source: github
+      alert: true
+      save_db: true
+
+# API 服务配置
+api:
+  enabled: false
+  host: 0.0.0.0
+  port: 8000
+
+agent:
+  verbose: true
+  max_iterations: 5

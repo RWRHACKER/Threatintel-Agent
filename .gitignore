@@ -52,6 +52,9 @@ data/reports/archive/
 # 根级报告目录（历史输出不应提交）
 reports/
 
+# 但保留示例报告
+!SAMPLE_REPORT.md
+
 # 环境变量备份
 .env.*
 *.env
